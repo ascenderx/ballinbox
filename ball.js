@@ -6,6 +6,7 @@ class Ball extends Entity {
     
     // defaults for kwargs
     this._color = 'white';
+    this._lineWidth = 5;
     
     for (let key in kwargs) {
       let value = kwargs[key];
@@ -69,7 +70,7 @@ class Ball extends Entity {
     } else {
       context.strokeStyle = color;
     }
-    context.lineWidth = 2;
+    context.lineWidth = this._lineWidth;
     context.beginPath();
     context.arc(
       super.position.x,
