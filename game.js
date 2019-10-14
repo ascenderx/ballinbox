@@ -49,30 +49,37 @@ class Game {
     this._draw();
   }
   
+  _modifyBallVelocity(position) {
+    let x0 = this._ball.position.x;
+    let y0 = this._ball.position.y;
+    let x1 = position.x;
+    let y1 = position.y;
+    
+    let dx = x1 - x0;
+    let dy = y1 - y0;
+    
+    this._ball.velocity.dx = dx;
+    this._ball.velocity.dy = dy;
+    
+    //this._ball.velocity.constrainX(this._maxSpeed);
+    //this._ball.velocity.constrainY(this._maxSpeed);
+    
+    this._cursor.x = x1;
+    this._cursor.y = y1;
+  }
+  
   _input() {
-    if (this._hdlInput.doubleClicked) {
+    if (this._hdlInput.doubleClicked || this._hdlInput.doubleTouched) {
       this._mode = (this._mode === GAMEMODE_RUNNING) ? GAMEMODE_PAUSED : GAMEMODE_RUNNING;
       this._hdlInput.debounceDoubleClick();
+      this._hdlInput.debounceDoubleTouch();
     }
     
     if (this._mode === GAMEMODE_PAUSED) {
       if (this._hdlInput.isButtonDown(BUTTON_LEFT)) {
-        let x0 = this._ball.position.x;
-        let y0 = this._ball.position.y;
-        let x1 = this._hdlInput.mousePosition.x;
-        let y1 = this._hdlInput.mousePosition.y;
-        
-        let dx = x1 - x0;
-        let dy = y1 - y0;
-        
-        this._ball.velocity.dx = dx;
-        this._ball.velocity.dy = dy;
-        
-        this._ball.velocity.constrainX(this._maxSpeed);
-        this._ball.velocity.constrainY(this._maxSpeed);
-        
-        this._cursor.x = x1;
-        this._cursor.y = y1;
+        this._modifyBallVelocity(this._hdlInput.mousePosition);
+      } else if (this._hdlInput.touched) {
+        this._modifyBallVelocity(this._hdlInput.touchPosition);
       }
     } else {
       this._cursor.x = null;
@@ -138,9 +145,9 @@ class Game {
     let ball = this._ball;
     
     context.clearRect(0, 0, canvas.width, canvas.height);
-    ball.draw(context);
     
     if (this._mode === GAMEMODE_PAUSED) {
+      ball.draw(context, '#ffff00');
       if (this._cursor.x !== null) {
         context.strokeStyle = this._cursor.color;
         context.lineWidth = 2;
@@ -149,6 +156,8 @@ class Game {
         context.lineTo(this._cursor.x, this._cursor.y);
         context.stroke();
       }
+    } else {
+      ball.draw(context);
     }
   }
 }

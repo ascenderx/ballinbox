@@ -10,6 +10,14 @@ class InputHandler {
       buttons: {},
       clicks: {},
     };
+    this._touch = {
+      presses: 0,
+      handle: null,
+      position: new Point(0, 0),
+    };
+    this._CLICK_DELAY = 500;
+    this._DBLCLICK_DELAY = 500;
+    this._TOUCH_DELAY = 500;
     
     this._initHandlers(canvas);
   }
@@ -87,6 +95,50 @@ class InputHandler {
     this._mouse.position.y = yValue;
   }
   
+  startTouch() {
+    this._touch.presses++;
+    
+    if (this._touch.handle) {
+      clearTimeout(this._touch.handle);
+      this._touch.handle = null;
+    }
+    this._touch.handle = setTimeout(() => {
+      this._touch.presses = 0;
+    }, this._TOUCH_DELAY);
+    
+  }
+  
+  setTouchXY(xValue, yValue) {
+    this._touch.position.x = xValue;
+    this._touch.position.y = yValue;
+  }
+  
+  endTouch() {
+    this._touch.handle = null;
+  }
+  
+  debounceTouch() {
+    this._touch.presses = 0;
+  }
+  
+  debounceDoubleTouch() {
+    if (this._touch.presses > 0) {
+      this._touch.presses = 1;
+    }
+  }
+  
+  get touched() {
+    return this._touch.presses > 0;
+  }
+  
+  get doubleTouched() {
+    return this._touch.presses > 1;
+  }
+  
+  get touchPosition() {
+    return this._touch.position;
+  }
+  
   _initHandlers(canvas) {
     canvas.addEventListener('keydown', (event) => {
       this.addKey(event.key);
@@ -118,14 +170,39 @@ class InputHandler {
       this._mouse.clicks.click = true;
       setTimeout(() => {
         delete this._mouse.clicks.click;
-      }, 500);
+      }, this._CLICK_DELAY);
     });
     
     canvas.addEventListener('dblclick', (event) => {
       this._mouse.clicks.dblclick = true;
       setTimeout(() => {
         delete this._mouse.clicks.dblclick;
-      }, 500);
+      }, this._DBLCLICK_DELAY);
+    });
+    
+    canvas.addEventListener('touchstart', (event) => {
+      event.preventDefault();
+      let touch = event.changedTouches[0];
+      
+      this.startTouch();
+      this.setTouchXY(touch.clientX, touch.clientY);
+    });
+    
+    canvas.addEventListener('touchmove', (event) => {
+      event.preventDefault();
+      let touch = event.changedTouches[0];
+      
+      this.setTouchXY(touch.clientX, touch.clientY);
+    });
+    
+    canvas.addEventListener('touchend', (event) => {
+      event.preventDefault();
+      this.endTouch();
+    });
+    
+    canvas.addEventListener('touchcancel', (event) => {
+      event.preventDefault();
+      this.endTouch();
     });
   }
 }

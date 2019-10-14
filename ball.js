@@ -63,8 +63,12 @@ class Ball extends Entity {
     return isRightOfLeft && isLeftOfRight && isBelowTop && isAboveBottom;
   }
   
-  draw(context) {
-    context.strokeStyle = this._color;
+  draw(context, color = null) {
+    if (!color) {
+      context.strokeStyle = this._color;
+    } else {
+      context.strokeStyle = color;
+    }
     context.lineWidth = 2;
     context.beginPath();
     context.arc(
