@@ -55,8 +55,8 @@ class Game {
     let x1 = position.x;
     let y1 = position.y;
     
-    let dx = x1 - x0;
-    let dy = y1 - y0;
+    let dx = (x1 - x0) / 5;
+    let dy = (y1 - y0) / 5;
     
     this._ball.velocity.dx = dx;
     this._ball.velocity.dy = dy;
